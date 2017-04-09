@@ -9,7 +9,7 @@
 #define RIGHT_BUTTON 12
 #define LED 13
 
-// Struct to hold state of a buttons
+// Struct to hold state of a button
 typedef struct {
   int pin;
   byte pressed;
