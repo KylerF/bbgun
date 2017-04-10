@@ -3,6 +3,9 @@
 // Default number of bbs to be loaded
 #define DEF_BBS 100
 
+// Default RPM of motor
+#define DEF_RPM 300
+
 // Pin definitions
 #define START_BUTTON 11
 #define LEFT_BUTTON 10
@@ -20,6 +23,10 @@ Button buttons[] = {{START_BUTTON, 0}, {LEFT_BUTTON, 0}, {RIGHT_BUTTON, 0}};
 
 // Whether or not to start execution
 bool start = false;
+
+// The speed (in RPM) of the motor.
+// Initialized to default value.
+long rpm = DEF_RPM;
 
 // Number of BBs to be loaded
 // Set to defined default
@@ -76,25 +83,25 @@ int buttonTapped(int pin) {
 // Loads the specified number of bbs
 // TODO: Take into account the motor speed that was set for timing
 void fire(int bbs) {
-  // For tracking time passed
+  // Same current time in millis for tracking time passed
   unsigned long currentTime = millis();
   unsigned long previousTime = currentTime;
 
-  // TODO: Calculate actual time taken for rotation. I need motor specs for this.
-  const long interval = 200;
+  // Calculate time taken for one motor rotation (in millis).
+  const long interval = 1000 / (rpm / 60);
 
   // Start the motor rotation.
   // Will become analogWrite once we have the speed parameter
   digitalWrite(MOTOR, HIGH);
   
-  // Allow motor to spin the number of times needed.
+  // Allow motor to spin the number of times needed
   for (int i = 0; i < bbs; i++) {
     if (!start) { break; }
 
     // Wait for motor to complete one full rotation
     while (currentTime - previousTime < interval) {
       // Allow user to stop firing by pressing the start button again.
-      // The last rotation is allowed to finish first.
+      // The current rotation is allowed to finish first.
       if (buttonTapped(START_BUTTON)) { start = false; }
 
       // Check the time
