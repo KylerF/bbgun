@@ -7,7 +7,7 @@
 #define START_BUTTON 11
 #define LEFT_BUTTON 10
 #define RIGHT_BUTTON 12
-#define LED 13
+#define MOTOR 9
 
 // Struct to hold state of a button
 typedef struct {
@@ -30,7 +30,7 @@ void setup() {
   pinMode(START_BUTTON, INPUT_PULLUP);
   pinMode(LEFT_BUTTON, INPUT_PULLUP);
   pinMode(RIGHT_BUTTON, INPUT_PULLUP);
-  pinMode(LED, OUTPUT);
+  pinMode(MOTOR, OUTPUT);
 }
 
 /*  *   *   *   * Button Actions  *   *   *   *  */
@@ -73,24 +73,62 @@ int buttonTapped(int pin) {
   return isSwJustReleased;
 }
 
+// Loads the specified number of bbs
+// TODO: Take into account the motor speed that was set for timing
+void fire(int bbs) {
+  // For tracking time passed
+  unsigned long currentTime = millis();
+  unsigned long previousTime = currentTime;
+
+  // TODO: Calculate actual time taken for rotation. I need motor specs for this.
+  const long interval = 200;
+
+  // Start the motor rotation.
+  // Will become analogWrite once we have the speed parameter
+  digitalWrite(MOTOR, HIGH);
+  
+  // Allow motor to spin the number of times needed.
+  for (int i = 0; i < bbs; i++) {
+    if (!start) { break; }
+
+    // Wait for motor to complete one full rotation
+    while (currentTime - previousTime < interval) {
+      // Allow user to stop firing by pressing the start button again.
+      // The last rotation is allowed to finish first.
+      if (buttonTapped(START_BUTTON)) { start = false; }
+
+      // Check the time
+      currentTime = millis();
+    }
+
+    // Save the last checked time after each rotation
+    previousTime = currentTime;
+  }
+
+  // Halt execution once we're finished
+  digitalWrite(MOTOR, LOW);
+  start = false;
+}
+
 
 
 void loop() {
   if (start){
-    // Do the stuff
+    // Start firing the gun
+    fire(bbs);
   } else {
     // Allow manipulation of start parameters:
     //   - Number to be loaded
     bbs += buttonTapped(RIGHT_BUTTON);
     bbs -= buttonTapped(LEFT_BUTTON);
-
-    Serial.println(bbs);
   }
 
   // Toggle start status when start button is pressed
   if (buttonTapped(START_BUTTON)) {
     start = !start;
   }
+
+  Serial.println(bbs);
 }
 
 
