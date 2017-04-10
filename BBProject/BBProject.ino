@@ -3,8 +3,8 @@
 // Default number of bbs to be loaded
 #define DEF_BBS 100
 
-// Default RPM of motor
-#define DEF_RPM 300
+// Default number of bbs to load per second
+#define DEF_BBSPERSEC 25
 
 // Pin definitions
 #define START_BUTTON 11
@@ -24,9 +24,9 @@ Button buttons[] = {{START_BUTTON, 0}, {LEFT_BUTTON, 0}, {RIGHT_BUTTON, 0}};
 // Whether or not to start execution
 bool start = false;
 
-// The speed (in RPM) of the motor.
+// The rate at which to load bbs (bbs/second)
 // Initialized to default value.
-long rpm = DEF_RPM;
+long bbsPerSecond = DEF_BBSPERSEC;
 
 // Number of BBs to be loaded
 // Set to defined default
@@ -83,12 +83,13 @@ int buttonTapped(int pin) {
 // Loads the specified number of bbs
 // TODO: Take into account the motor speed that was set for timing
 void fire(int bbs) {
+  Serial.println("FIRING");
   // Same current time in millis for tracking time passed
   unsigned long currentTime = millis();
   unsigned long previousTime = currentTime;
 
   // Calculate time taken for one motor rotation (in millis).
-  const long interval = 1000 / (rpm / 60);
+  const long interval = 1000 / bbsPerSecond;
 
   // Start the motor rotation.
   // Will become analogWrite once we have the speed parameter
@@ -128,6 +129,9 @@ void loop() {
     //   - Number to be loaded
     bbs += buttonTapped(RIGHT_BUTTON);
     bbs -= buttonTapped(LEFT_BUTTON);
+
+    // Specify allowed range for number of bbs
+    if (bbs < 1) { bbs = 1; }
   }
 
   // Toggle start status when start button is pressed
