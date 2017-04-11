@@ -106,7 +106,7 @@ void updateDisplay() {
   String statusString;
 
   if (start) {
-    statusString = "Firing!";
+    statusString = "Firing";
   } else {
     statusString = "Ready to fire";
   }
