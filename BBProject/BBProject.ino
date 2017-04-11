@@ -1,5 +1,10 @@
 //BB Code
 
+// LED display libraries
+#include <Adafruit_GFX.h>
+#include <gfxfont.h>
+#include <Adafruit_SSD1306.h>
+
 // Default number of bbs to be loaded
 #define DEF_BBS 100
 
@@ -11,6 +16,10 @@
 #define LEFT_BUTTON 10
 #define RIGHT_BUTTON 12
 #define MOTOR 9
+
+// LED display setup
+#define OLED_RESET 4
+Adafruit_SSD1306 display(OLED_RESET);
 
 // Struct to hold state of a button
 typedef struct {
@@ -33,7 +42,11 @@ long bbsPerSecond = DEF_BBSPERSEC;
 int bbs = DEF_BBS;
 
 void setup() {
-  Serial.begin(9600);
+  // Initialize the display
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  display.display();
+  
+  // Pin setup
   pinMode(START_BUTTON, INPUT_PULLUP);
   pinMode(LEFT_BUTTON, INPUT_PULLUP);
   pinMode(RIGHT_BUTTON, INPUT_PULLUP);
@@ -80,10 +93,34 @@ int buttonTapped(int pin) {
   return isSwJustReleased;
 }
 
-// Loads the specified number of bbs
-// TODO: Take into account the motor speed that was set for timing
-void fire(int bbs) {
-  Serial.println("FIRING");
+/*  *   *   *   *  LED Display Methods  *   *   *   *  */
+// Updates the display with current status
+void updateDisplay() {
+  display.clearDisplay();
+
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.setCursor(0,0);
+  display.println("BB Destroyer");
+
+  String statusString;
+
+  if (start) {
+    statusString = "Firing!";
+  } else {
+    statusString = "Ready to fire";
+  }
+
+  display.println(statusString);
+  display.setTextSize(2);
+  display.print("    ");
+  display.println(bbs); 
+
+  display.display();
+}
+
+// Fires the specified number of bbs
+void fire() {
   // Same current time in millis for tracking time passed
   unsigned long currentTime = millis();
   unsigned long previousTime = currentTime;
@@ -91,12 +128,15 @@ void fire(int bbs) {
   // Calculate time taken for one motor rotation (in millis).
   const long interval = 1000 / bbsPerSecond;
 
+  // Hold on to number of bbs initially loaded
+  int startBbs = bbs;
+
   // Start the motor rotation.
   // Will become analogWrite once we have the speed parameter
   digitalWrite(MOTOR, HIGH);
   
   // Allow motor to spin the number of times needed
-  for (int i = 0; i < bbs; i++) {
+  for (int i = 0; i < startBbs; i++) {
     if (!start) { break; }
 
     // Wait for motor to complete one full rotation
@@ -109,6 +149,10 @@ void fire(int bbs) {
       currentTime = millis();
     }
 
+    // Update the number of bbs loaded and update display
+    bbs--;
+    updateDisplay();
+
     // Save the last checked time after each rotation
     previousTime = currentTime;
   }
@@ -116,6 +160,7 @@ void fire(int bbs) {
   // Halt execution once we're finished
   digitalWrite(MOTOR, LOW);
   start = false;
+  bbs = startBbs;
 }
 
 
@@ -123,7 +168,7 @@ void fire(int bbs) {
 void loop() {
   if (start){
     // Start firing the gun
-    fire(bbs);
+    fire();
   } else {
     // Allow manipulation of start parameters:
     //   - Number to be loaded
@@ -139,7 +184,7 @@ void loop() {
     start = !start;
   }
 
-  Serial.println(bbs);
+  updateDisplay();
 }
 
 
