@@ -8,14 +8,14 @@
 // Default number of bbs to be loaded
 #define DEF_BBS 100
 
-// Default number of bbs to load per second
+// Number of bbs loaded per second
 #define DEF_BBSPERSEC 25
 
 // Pin definitions
-#define START_BUTTON 11
-#define LEFT_BUTTON 10
-#define RIGHT_BUTTON 12
-#define MOTOR 9
+#define LEFT_BUTTON 11
+#define START_BUTTON 10
+#define RIGHT_BUTTON 9
+#define MOTOR 3
 
 // LED display setup
 #define OLED_RESET 4
