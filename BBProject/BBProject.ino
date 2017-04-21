@@ -1,14 +1,9 @@
 //BB Code
 
-// LED display libraries
-#include <Adafruit_GFX.h>
-#include <gfxfont.h>
-#include <Adafruit_SSD1306.h>
-
 // Default number of bbs to be loaded
 #define DEF_BBS 100
 
-// Number of bbs loaded per second
+// Rate of bbs loaded per second
 #define DEF_BBSPERSEC 25
 
 // Pin definitions
@@ -17,9 +12,29 @@
 #define RIGHT_BUTTON 9
 #define MOTOR 3
 
+
+
+// LED display libraries
+#include <Adafruit_GFX.h>
+#include <gfxfont.h>
+#include <Adafruit_SSD1306.h>
+
 // LED display setup
 #define OLED_RESET 4
 Adafruit_SSD1306 display(OLED_RESET);
+
+void setup() {
+  // Initialize the display
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  display.display();
+  
+  // Pin setup
+  pinMode(START_BUTTON, INPUT_PULLUP);
+  pinMode(LEFT_BUTTON, INPUT_PULLUP);
+  pinMode(RIGHT_BUTTON, INPUT_PULLUP);
+  pinMode(MOTOR, OUTPUT);
+}
+
 
 // Struct to hold state of a button
 typedef struct {
@@ -40,18 +55,6 @@ long bbsPerSecond = DEF_BBSPERSEC;
 // Number of BBs to be loaded
 // Set to defined default
 int bbs = DEF_BBS;
-
-void setup() {
-  // Initialize the display
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
-  display.display();
-  
-  // Pin setup
-  pinMode(START_BUTTON, INPUT_PULLUP);
-  pinMode(LEFT_BUTTON, INPUT_PULLUP);
-  pinMode(RIGHT_BUTTON, INPUT_PULLUP);
-  pinMode(MOTOR, OUTPUT);
-}
 
 /*  *   *   *   * Button Actions  *   *   *   *  */
 // Gets the last saved state of a button
@@ -119,6 +122,8 @@ void updateDisplay() {
   display.display();
 }
 
+
+/*  *   *   *   *  Motor actions  *   *   *   *  */
 // Fires the specified number of bbs
 void fire() {
   // Same current time in millis for tracking time passed
@@ -132,7 +137,6 @@ void fire() {
   int startBbs = bbs;
 
   // Start the motor rotation.
-  // Will become analogWrite once we have the speed parameter
   digitalWrite(MOTOR, HIGH);
   
   // Allow motor to spin the number of times needed
@@ -184,6 +188,7 @@ void loop() {
     start = !start;
   }
 
+  // Update the display with current status
   updateDisplay();
 }
 
