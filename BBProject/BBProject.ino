@@ -9,10 +9,8 @@
 // Pin definitions
 #define LEFT_BUTTON 11
 #define START_BUTTON 10
-#define RIGHT_BUTTON 9
-#define MOTOR 3
-
-
+#define RIGHT_BUTTON 12
+#define MOTOR 9
 
 // LED display libraries
 #include <Adafruit_GFX.h>
@@ -104,14 +102,14 @@ void updateDisplay() {
   display.setTextSize(1);
   display.setTextColor(WHITE);
   display.setCursor(0,0);
-  display.println("BB Destroyer");
+  display.println("BB Feeder");
 
   String statusString;
 
   if (start) {
-    statusString = "Firing";
+    statusString = "Feeding";
   } else {
-    statusString = "Ready to fire";
+    statusString = "Ready to feed";
   }
 
   display.println(statusString);
@@ -176,8 +174,8 @@ void loop() {
   } else {
     // Allow manipulation of start parameters:
     //   - Number to be loaded
-    bbs += buttonTapped(RIGHT_BUTTON);
-    bbs -= buttonTapped(LEFT_BUTTON);
+    bbs += 5 * buttonTapped(RIGHT_BUTTON);
+    bbs -= 5 * buttonTapped(LEFT_BUTTON);
 
     // Specify allowed range for number of bbs
     if (bbs < 1) { bbs = 1; }
