@@ -4,18 +4,20 @@
 #define DEF_BBS 100
 
 // Rate of bbs loaded per second
-#define DEF_BBSPERSEC 25
+#define DEF_BBSPERSEC 11
 
 // Pin definitions
 #define LEFT_BUTTON 11
-#define START_BUTTON 10
+#define START_BUTTON 8
 #define RIGHT_BUTTON 12
-#define MOTOR 9
+#define MOTOR 10
 
 // LED display libraries
 #include <Adafruit_GFX.h>
 #include <gfxfont.h>
 #include <Adafruit_SSD1306.h>
+
+#include "TimerOne.h"
 
 // LED display setup
 #define OLED_RESET 4
@@ -31,6 +33,10 @@ void setup() {
   pinMode(LEFT_BUTTON, INPUT_PULLUP);
   pinMode(RIGHT_BUTTON, INPUT_PULLUP);
   pinMode(MOTOR, OUTPUT);
+
+  // 1 second period, 75% duty cycle
+  Timer1.initialize(10000);
+  Timer1.pwm(9, 128);
 }
 
 
@@ -124,6 +130,8 @@ void updateDisplay() {
 /*  *   *   *   *  Motor actions  *   *   *   *  */
 // Fires the specified number of bbs
 void fire() {
+  Timer1.attachInterrupt(toggleMotor);
+  
   // Same current time in millis for tracking time passed
   unsigned long currentTime = millis();
   unsigned long previousTime = currentTime;
@@ -136,11 +144,11 @@ void fire() {
 
   // Start the motor rotation.
   //digitalWrite(MOTOR, HIGH);
-  TCCR1A = 0b01010011;
-  TCCR1B = 0b00011101;
-  OCR1A = 125000;
-  OCR1B = 125000;
-  DDRB |= 0b00000010;
+//  TCCR1A = 0b01010011;
+//  TCCR1B = 0b00011101;
+//  OCR1A = 125000;
+//  OCR1B = 125000;
+//  DDRB |= 0b00000010;
 
   // Allow motor to spin the number of times needed
   for (int i = 0; i < startBbs; i++) {
@@ -166,15 +174,19 @@ void fire() {
 
   // Halt execution once we're finished
   //digitalWrite(MOTOR, LOW);
-  TCCR1A = 0b00000000;
-  TCCR1B = 0b00000000;
-  OCR1A = 0;
-  OCR1B = 0;
+  //  TCCR1A = 0b00000000;
+  //  TCCR1B = 0b00000000;
+  //  OCR1A = 0;
+  //  OCR1B = 0;
   start = false;
   bbs = startBbs;
+  Timer1.detachInterrupt();
+  digitalWrite(MOTOR, LOW);
 }
 
-
+void toggleMotor() {
+  digitalWrite(MOTOR, digitalRead(MOTOR) ^ 1);
+}
 
 void loop() {
   if (start){
