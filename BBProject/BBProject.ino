@@ -135,8 +135,13 @@ void fire() {
   int startBbs = bbs;
 
   // Start the motor rotation.
-  digitalWrite(MOTOR, HIGH);
-  
+  //digitalWrite(MOTOR, HIGH);
+  TCCR1A = 0b01010011;
+  TCCR1B = 0b00011101;
+  OCR1A = 125000;
+  OCR1B = 125000;
+  DDRB |= 0b00000010;
+
   // Allow motor to spin the number of times needed
   for (int i = 0; i < startBbs; i++) {
     if (!start) { break; }
@@ -160,7 +165,11 @@ void fire() {
   }
 
   // Halt execution once we're finished
-  digitalWrite(MOTOR, LOW);
+  //digitalWrite(MOTOR, LOW);
+  TCCR1A = 0b00000000;
+  TCCR1B = 0b00000000;
+  OCR1A = 0;
+  OCR1B = 0;
   start = false;
   bbs = startBbs;
 }
@@ -178,7 +187,7 @@ void loop() {
     bbs -= 5 * buttonTapped(LEFT_BUTTON);
 
     // Specify allowed range for number of bbs
-    if (bbs < 1) { bbs = 1; }
+    if (bbs < 1) { bbs = 0; }
   }
 
   // Toggle start status when start button is pressed
